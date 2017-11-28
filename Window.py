@@ -23,15 +23,28 @@ class Vector:
         self.x = x
         self.y = y
 
-    #
-    # def x(self):
-    #     return self.x
-    #
-    # def y(self):
-    #     return self.Y
-
     def posArray(self):
         return [self.x, self.y]
+
+
+class Node:
+    def __init__(self, pos, payload):
+        self.pos = pos
+        self.payload = payload
+        self.neighbors = []
+        self.parent = None
+        self.g = -1
+        self.h = -1
+        self.f = -1
+
+    def AddNeighbors(self, node):
+        self.neighbors.append(node)
+
+    def RemoveNeighbors(self, node):
+        self.neighbors.remove(node)
+
+    def GetPayload(self):
+        return self.payload
 
 
 class Creature:
@@ -44,14 +57,22 @@ class Creature:
         pygame.draw.rect(screen, self.color, curRect, 0)
 
     def isOnItem(self, maze):
-        if maze[self.pos.x][self.pos.y] == 2:
+        x = self.pos.x
+        y = self.pos.y
+        if len(maze) > x >= 0 and len(maze) > y >= 0 and maze[x][y].payload == 2:
             return True;
         return False;
+
+    @staticmethod
+    def checkEmpty(x, y, maze):
+        if len(maze) > x >= 0 and len(maze) > y >= 0 and maze[x][y].payload != 1:
+            return True
+        return False
 
 
 class Player(Creature):
     def __init__(self, x, y, color):
-        Creature.__init__(x, y, color)
+        Creature.__init__(self, x, y, color)
 
         self.up = 273
         self.down = 274
@@ -61,34 +82,92 @@ class Player(Creature):
         self.speed = 1
 
     def move(self, key, maze):
-        if key == self.up and maze[self.pos.x][self.pos.y - 1] != 1:
+        if key == self.up and self.checkEmpty(self.pos.x, self.pos.y - 1, maze):
             self.pos.y -= self.speed
-        elif key == self.down and maze[self.pos.x][self.pos.y + 1] != 1:
+        elif key == self.down and self.checkEmpty(self.pos.x, self.pos.y + 1, maze):
             self.pos.y += self.speed
-        elif key == self.left and maze[self.pos.x - 1][self.pos.y] != 1:
+        elif key == self.left and self.checkEmpty(self.pos.x - 1, self.pos.y, maze):
             self.pos.x -= self.speed
-        elif key == self.right and maze[self.pos.x + 1][self.pos.y] != 1:
+        elif key == self.right and self.checkEmpty(self.pos.x + 1, self.pos.y, maze):
             self.pos.x += self.speed
 
 
 class AI(Creature):
     def __init__(self, x, y, color):
-        Creature.__init__(x, y, color)
+        Creature.__init__(self, x, y, color)
         self.pos = Vector(x, y)
 
     def moveInDirection(self, direction, maze):
         if direction == 0:
-            if self.pos.x > 0:
-                self.pos.x -= 1
+            if self.pos.x - 1 > 0:
+                if self.checkEmpty(self.pos.x - 1, self.pos.y, maze):
+                    self.pos.x -= 1
         elif direction == 1:
-            if self.pos.y > 0:
-                self.pos.y -= 1
+            if self.pos.y - 1 > 0:
+                if self.checkEmpty(self.pos.x, self.pos.y - 1, maze):
+                    self.pos.y -= 1
         elif direction == 2:
-            if self.pos.x < len(maze):
-                self.pos.x += 1
+            if self.pos.x + 1 < len(maze):
+                if self.checkEmpty(self.pos.x + 1, self.pos.y, maze):
+                    self.pos.x += 1
         elif direction == 3:
-            if self.pos.y < len(maze):
-                self.pos.y += 1
+            if self.pos.y + 10 < len(maze):
+                if self.checkEmpty(self.pos.x, self.pos.y + 1, maze):
+                    self.pos.y += 1
+
+    def distanceToNode(self, start, goal):
+        return math.sqrt(math.pow(start.x - goal.x, 2),math.pow(start.y - goal.y, 2) )
+
+    def AStart(self, maze, start, goal):
+        #Already visited nodes
+        closedSet = []
+
+        start.g = 0
+        start.f = self.distanceToNode(start, goal)
+
+        #Possible nodes to visit
+        openSet = [start]
+
+        while len(openSet) > 0:
+            sorted(openSet, key=lambda Node: Node.f)
+            current = openSet.pop(0)
+
+        '''
+    while openSet is not empty
+        current := the node in openSet having the lowest fScore[] value
+        if current = goal
+            return reconstruct_path(cameFrom, current)
+
+        openSet.Remove(current)
+        closedSet.Add(current)
+
+        for each neighbor of current
+            if neighbor in closedSet
+                continue		// Ignore the neighbor which is already evaluated.
+
+            if neighbor not in openSet	// Discover a new node
+                openSet.Add(neighbor)
+            
+            // The distance from start to a neighbor
+            //the "dist_between" function may vary as per the solution requirements.
+            tentative_gScore := gScore[current] + dist_between(current, neighbor)
+            if tentative_gScore >= gScore[neighbor]
+                continue		// This is not a better path.
+
+            // This path is the best until now. Record it!
+            cameFrom[neighbor] := current
+            gScore[neighbor] := tentative_gScore
+            fScore[neighbor] := gScore[neighbor] + heuristic_cost_estimate(neighbor, goal) 
+
+    return failure
+
+function reconstruct_path(cameFrom, current)
+    total_path := [current]
+    while current in cameFrom.Keys:
+        current := cameFrom[current]
+        total_path.append(current)
+    return total_path
+        '''
 
 def showScreen(screen, maze):
     # Display the map
@@ -96,11 +175,13 @@ def showScreen(screen, maze):
     for i in range(0, len(maze)):
         for j in range(0, len(maze[i])):
             curRect = (i * stepSize + 1, j * stepSize + 1, stepSize - 1, stepSize - 1)
-            if maze[i][j] == 1:
+            payload = maze[i][j].payload
+            print payload
+            if payload == 1:
                 pygame.draw.rect(screen, (255, 0, 0), curRect, 0)
-            elif maze[i][j] == 0:
+            elif payload == 0:
                 pygame.draw.rect(screen, (0, 255, 0), curRect, 0)
-            elif maze[i][j] == 2:
+            elif payload == 2:
                 pygame.draw.rect(screen, (255, 100, 0), curRect, 0)
 
 
@@ -112,11 +193,11 @@ def readMaze():
     for i in range(N):
         maze.append([])
         for j in range(N):
-            maze[i].append(0)
+            maze[i].append(Node(Vector(i, j), 0))
     for i in range(N):
         fileRead = f.readline().split()
         for j in range(len(fileRead)):
-            maze[j][i] = int(fileRead[j])
+            maze[j][i].payload = int(fileRead[j])
     f.close()
     return width / len(maze), N, maze
 
@@ -127,7 +208,7 @@ height = 400
 
 def main():
     score = 0
-    player = Player(1, 15)
+    player = Player(1, 15, (0, 0, 255))
     # Initialise screen
     pygame.init()
     screen = pygame.display.set_mode((width, height))
@@ -139,9 +220,9 @@ def main():
     background.fill((250, 250, 250))
 
     stepSize, N, maze = readMaze()
-    ai = AI(2, 3, N)
+    ai = AI(2, 3, (255, 0, 255))
     showScreen(screen, maze)
-    player.drawPlayer(screen, stepSize)
+    player.drawCreature(screen, stepSize)
     pygame.display.update()
 
     # Event loop
@@ -153,14 +234,17 @@ def main():
             if event.type == KEYUP:
                 player.move(event.key, maze)
                 if player.isOnItem(maze):
-                    maze[player.pos.x][player.pos.y] = 0
+                    maze[player.pos.x][player.pos.y].payload = 0
                     score += 1
                     print score
-                    maze[random.randint(0, N - 1)][random.randint(0, N - 1)] = 2
+                    maze[random.randint(0, N - 1)][random.randint(0, N - 1)].payload = 2
                 showScreen(screen, maze)
-                player.drawPlayer(screen, stepSize)
-                ai.moveInDirection(random.randint(0, 3))
-                ai.drawAI(screen, stepSize)
+                player.drawCreature(screen, stepSize)
+                ai.moveInDirection(random.randint(0, 3), maze)
+                if ai.isOnItem(maze):
+                    maze[ai.pos.x][ai.pos.y].payload = 0
+                    maze[random.randint(0, N - 1)][random.randint(0, N - 1)].payload = 2
+                ai.drawCreature(screen, stepSize)
                 pygame.display.update()
 
 
