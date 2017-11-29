@@ -30,21 +30,24 @@ class Vector:
 class Node:
     def __init__(self, pos, payload):
         self.pos = pos
+        self.floor = 0
         self.payload = payload
         self.neighbors = []
         self.parent = None
         self.g = -1
-        self.h = -1
         self.f = -1
 
-    def AddNeighbors(self, node):
+    def addNeighbors(self, node):
         self.neighbors.append(node)
 
-    def RemoveNeighbors(self, node):
+    def removeNeighbors(self, node):
         self.neighbors.remove(node)
 
-    def GetPayload(self):
+    def getPayload(self):
         return self.payload
+
+    def getNeighbors(self):
+        return self.neighbors
 
 
 class Creature:
@@ -92,10 +95,31 @@ class Player(Creature):
             self.pos.x += self.speed
 
 
+def distanceToNode(start, goal):
+    return math.sqrt(math.pow(start.pos.x - goal.pos.x, 2) + math.pow(start.pos.y - goal.pos.y, 2))
+
+
+def reconstructPath(node):
+    path = []
+    while node.parent != None:
+        path.append(node)
+        node = node.parent
+    return path
+
+
+def GetHScore(curNeigh, goal):
+    return distanceToNode(curNeigh, goal)
+
+
+def getRandomFloorValue():
+    return random.randint(0, 10)
+
+
 class AI(Creature):
     def __init__(self, x, y, color):
         Creature.__init__(self, x, y, color)
         self.pos = Vector(x, y)
+        self.path = []
 
     def moveInDirection(self, direction, maze):
         if direction == 0:
@@ -115,59 +139,63 @@ class AI(Creature):
                 if self.checkEmpty(self.pos.x, self.pos.y + 1, maze):
                     self.pos.y += 1
 
-    def distanceToNode(self, start, goal):
-        return math.sqrt(math.pow(start.x - goal.x, 2),math.pow(start.y - goal.y, 2) )
+    def moveToNode(self, maze, goal):
+        if len(self.path) == 0:
+            self.path = self.aStar(maze, maze[self.pos.x][self.pos.y], goal)
+        if len(self.path) > 0:
+            self.pos = self.path.pop().pos
 
-    def AStart(self, maze, start, goal):
-        #Already visited nodes
+    def aStar(self, maze, start, goal):
+        # Already visited nodes
+        for i in range(0, len(maze)):
+            for j in range(0, len(maze)):
+                maze[i][j].g = -1
+                maze[i][j].f = 0
+                maze[i][j].parent = None
+                maze[i][j].floor = 0
+
         closedSet = []
 
         start.g = 0
-        start.f = self.distanceToNode(start, goal)
+        start.f = distanceToNode(start, goal)
 
-        #Possible nodes to visit
+        # Possible nodes to visit
         openSet = [start]
 
         while len(openSet) > 0:
             sorted(openSet, key=lambda Node: Node.f)
             current = openSet.pop(0)
+            if current == goal:
+                return reconstructPath(current)
 
-        '''
-    while openSet is not empty
-        current := the node in openSet having the lowest fScore[] value
-        if current = goal
-            return reconstruct_path(cameFrom, current)
+            closedSet.append(current)
 
-        openSet.Remove(current)
-        closedSet.Add(current)
+            neighs = current.getNeighbors()
+            for i in range(0, len(neighs)):
+                if len(neighs) > 0 and random.random() > 0.9:
+                    continue
+                curNeigh = neighs[i]
+                if closedSet.__contains__(curNeigh):
+                    continue
 
-        for each neighbor of current
-            if neighbor in closedSet
-                continue		// Ignore the neighbor which is already evaluated.
+                if not openSet.__contains__(curNeigh):
+                    openSet.append(curNeigh)
 
-            if neighbor not in openSet	// Discover a new node
-                openSet.Add(neighbor)
-            
-            // The distance from start to a neighbor
-            //the "dist_between" function may vary as per the solution requirements.
-            tentative_gScore := gScore[current] + dist_between(current, neighbor)
-            if tentative_gScore >= gScore[neighbor]
-                continue		// This is not a better path.
+                tentativeGScore = current.g + 1
+                if curNeigh.g != -1 and tentativeGScore >= curNeigh.g:
+                    continue  # It's not a better score
 
-            // This path is the best until now. Record it!
-            cameFrom[neighbor] := current
-            gScore[neighbor] := tentative_gScore
-            fScore[neighbor] := gScore[neighbor] + heuristic_cost_estimate(neighbor, goal) 
+                curNeigh.parent = current
+                curNeigh.g = tentativeGScore
+                curNeigh.f = curNeigh.g + GetHScore(curNeigh, goal)
+                curNeigh.floor = 255
+        print "Error No path found"
+        return []
 
-    return failure
 
-function reconstruct_path(cameFrom, current)
-    total_path := [current]
-    while current in cameFrom.Keys:
-        current := cameFrom[current]
-        total_path.append(current)
-    return total_path
-        '''
+def mapToRange(x, in_min, in_max, out_min, out_max):
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+
 
 def showScreen(screen, maze):
     # Display the map
@@ -176,13 +204,22 @@ def showScreen(screen, maze):
         for j in range(0, len(maze[i])):
             curRect = (i * stepSize + 1, j * stepSize + 1, stepSize - 1, stepSize - 1)
             payload = maze[i][j].payload
-            print payload
             if payload == 1:
                 pygame.draw.rect(screen, (255, 0, 0), curRect, 0)
             elif payload == 0:
-                pygame.draw.rect(screen, (0, 255, 0), curRect, 0)
+                val = math.fabs(maze[i][j].f)*5
+                if val > 254:
+                    val = 254
+                pygame.draw.rect(screen, (val, 255, val), curRect, 0)
             elif payload == 2:
                 pygame.draw.rect(screen, (255, 100, 0), curRect, 0)
+
+
+def getRandomEmptyBlock(maze):
+    itemPos = Vector(random.randint(0, len(maze) - 1), random.randint(0, len(maze) - 1))
+    while maze[itemPos.x][itemPos.y].payload == 1:
+        itemPos = Vector(random.randint(0, len(maze) - 1), random.randint(0, len(maze) - 1))
+    return itemPos
 
 
 def readMaze():
@@ -198,8 +235,26 @@ def readMaze():
         fileRead = f.readline().split()
         for j in range(len(fileRead)):
             maze[j][i].payload = int(fileRead[j])
+    for i in range(N):
+        for j in range(len(fileRead)):
+            if j + 1 < N and not isWall(maze, j + 1, i):
+                maze[j][i].neighbors.append(maze[j + 1][i])
+            if j - 1 >= 0 and not isWall(maze, j - 1, i):
+                maze[j][i].neighbors.append(maze[j - 1][i])
+            if i + 1 < N and not isWall(maze, j, i + 1):
+                maze[j][i].neighbors.append(maze[j][i + 1])
+            if i - 1 >= 0 and not isWall(maze, j, i - 1):
+                maze[j][i].neighbors.append(maze[j][i - 1])
     f.close()
-    return width / len(maze), N, maze
+    itemPos = getRandomEmptyBlock(maze)
+    maze[itemPos.x][itemPos.y].payload = 2
+    return width / len(maze), N, maze, itemPos
+
+
+def isWall(maze, x, y):
+    if maze[x][y].payload != 1:
+        return False
+    return True
 
 
 width = 400
@@ -219,8 +274,8 @@ def main():
     background = background.convert()
     background.fill((250, 250, 250))
 
-    stepSize, N, maze = readMaze()
-    ai = AI(2, 3, (255, 0, 255))
+    stepSize, N, maze, itemPos = readMaze()
+    ai = AI(1, 3, (255, 0, 255))
     showScreen(screen, maze)
     player.drawCreature(screen, stepSize)
     pygame.display.update()
@@ -233,17 +288,21 @@ def main():
                 return
             if event.type == KEYUP:
                 player.move(event.key, maze)
+                showScreen(screen, maze)
+                player.drawCreature(screen, stepSize)
+                # ai.moveInDirection(random.randint(0, 3), maze)
+                ai.moveToNode(maze, maze[itemPos.x][itemPos.y])
+                if ai.isOnItem(maze):
+                    maze[ai.pos.x][ai.pos.y].payload = 0
+                    itemPos = getRandomEmptyBlock(maze)
+                    maze[itemPos.x][itemPos.y].payload = 2
                 if player.isOnItem(maze):
                     maze[player.pos.x][player.pos.y].payload = 0
                     score += 1
                     print score
-                    maze[random.randint(0, N - 1)][random.randint(0, N - 1)].payload = 2
-                showScreen(screen, maze)
-                player.drawCreature(screen, stepSize)
-                ai.moveInDirection(random.randint(0, 3), maze)
-                if ai.isOnItem(maze):
-                    maze[ai.pos.x][ai.pos.y].payload = 0
-                    maze[random.randint(0, N - 1)][random.randint(0, N - 1)].payload = 2
+                    itemPos = getRandomEmptyBlock(maze)
+                    maze[itemPos.x][itemPos.y].payload = 2
+                    ai.path = []
                 ai.drawCreature(screen, stepSize)
                 pygame.display.update()
 
