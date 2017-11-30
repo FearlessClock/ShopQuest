@@ -1,6 +1,9 @@
 import Cell
 import random
 
+WALL_CHAR = "#"
+PATH_CHAR = "*"
+
 class Maze:
     def __init__(self, width, height):
         self.width = width + 1      #Y
@@ -19,10 +22,15 @@ class Maze:
         
         while(visitedCount < self.height * self.width):
             currentNeighbours = self.findCurrentNeighbours(coordX, coordY)
+            
+            
             if(currentNeighbours is not None):
                 visitedCells.append((coordX, coordY))                           #mark this position as visited
                 nextCoordX, nextCoordY = random.choice(currentNeighbours)       #choose a random neighboor
+                
                 self.matrix[coordX][coordY].removeWalls(nextCoordX, nextCoordY)
+                self.matrix[nextCoordX][nextCoordY].removeWalls(coordX, coordY)
+
                 self.matrix[nextCoordX][nextCoordY].visited = True
                 coordX = nextCoordX
                 coordY = nextCoordY
@@ -32,7 +40,7 @@ class Maze:
             elif(len(visitedCells) > 0):
                 coordX, coordY = visitedCells.pop()
                 path.append((coordX, coordY)) 
-                                    
+            
         for i in range(self.height):
             for j in range(self.width):
                 self.matrix[i][j].visited = False
@@ -52,7 +60,7 @@ class Maze:
         for x in range(self.height * 2 + 1):
             new = []
             for y in range(self.width * 2 + 1):
-                new.append("#")
+                new.append(WALL_CHAR)
             matrix.append(new)
         return matrix
         
@@ -82,15 +90,17 @@ class Maze:
     def updateVisualMatrix(self):
         for x in range(self.height):
             for y in range(self.width):
-                self.visual_matrix[x * 2 + 1][y * 2 + 1] = "*"
+                self.visual_matrix[x * 2 + 1][y * 2 + 1] = PATH_CHAR
+                
                 if(not self.matrix[x][y].walls["TOP"]):
-                    self.visual_matrix[x * 2][y * 2 + 1] = "*"
-                elif(not self.matrix[x][y].walls["RIGHT"]):
-                    self.visual_matrix[x * 2 + 1][y * 2 + 2] = "*"
-                elif(not self.matrix[x][y].walls["BOTTOM"]):
-                    self.visual_matrix[x * 2 + 2][y * 2 + 1] = "*"
-                elif(not self.matrix[x][y].walls["LEFT"]):
-                    self.visual_matrix[x * 2 + 1][y * 2] = "*"
+                    self.visual_matrix[x * 2][y * 2 + 1] = PATH_CHAR
+                if(not self.matrix[x][y].walls["RIGHT"]):
+                    self.visual_matrix[x * 2 + 1][y * 2 + 2] = PATH_CHAR
+                if(not self.matrix[x][y].walls["BOTTOM"]):
+                    self.visual_matrix[x * 2 + 2][y * 2 + 1] = PATH_CHAR
+                if(not self.matrix[x][y].walls["LEFT"]):
+                    self.visual_matrix[x * 2 + 1][y * 2] = PATH_CHAR
+            
 
     def __str__(self):
         self.updateVisualMatrix()
@@ -102,7 +112,7 @@ class Maze:
         return res
 
 
-maze = Maze(5,5)
+maze = Maze(10,10)
 maze.generate()
 print maze
 
