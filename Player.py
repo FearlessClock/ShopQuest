@@ -1,9 +1,8 @@
 import Creature
 
 class Player(Creature.Creature):
-    def __init__(self, x, y, color):
-        Creature.Creature.__init__(self, x, y, color)
-
+    def __init__(self, x, y, color, filename):
+        Creature.Creature.__init__(self, x, y, color, filename)
         self.up = 273
         self.down = 274
         self.right = 275
@@ -20,5 +19,4 @@ class Player(Creature.Creature):
             self.pos.x -= self.speed
         elif key == self.right and self.checkEmpty(self.pos.x + 1, self.pos.y, maze):
             self.pos.x += self.speed
-
 

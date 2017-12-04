@@ -22,8 +22,8 @@ def reconstructPath(node):
 
 
 class AI(Creature.Creature):
-    def __init__(self, x, y, color):
-        Creature.Creature.__init__(self, x, y, color)
+    def __init__(self, x, y, color, filename):
+        Creature.Creature.__init__(self, x, y, color, filename)
         self.pos = Vector.Vector(x, y)
         self.path = []
 
@@ -69,7 +69,7 @@ class AI(Creature.Creature):
         openSet = [start]
 
         while len(openSet) > 0:
-            sorted(openSet, key=lambda Node: Node.f)
+            sorted(openSet, key=lambda Node: Node.f)        #Rather just search for the best one, it is O(1)
             current = openSet.pop(0)
             if current == goal:
                 return reconstructPath(current)
@@ -78,7 +78,7 @@ class AI(Creature.Creature):
 
             neighs = current.getNeighbors()
             for i in range(0, len(neighs)):
-                if len(neighs) > 0 and random.random() > 0.9:
+                if len(neighs) > 0 and random.random() > 0.97:
                     continue
                 curNeigh = neighs[i]
                 if closedSet.__contains__(curNeigh):

@@ -37,7 +37,7 @@ def showScreen(screen, maze):
     stepSize = width / len(maze)
     for i in range(0, len(maze)):
         for j in range(0, len(maze[i])):
-            curRect = (i * stepSize + 1, j * stepSize + 1, stepSize - 1, stepSize - 1)
+            curRect = (i * stepSize , j * stepSize , stepSize , stepSize )
             payload = maze[i][j].payload
             if payload == 1:
                 pygame.draw.rect(screen, (255, 0, 0), curRect, 0)
@@ -106,11 +106,11 @@ height = 400
 
 def main():
     score = 0
-    player = Player.Player(1, 15, (0, 0, 255))
+    player = Player.Player(1, 15, (0, 0, 255), 'icons/player.png')
     # Initialise screen
     pygame.init()
     screen = pygame.display.set_mode((width, height))
-    pygame.display.set_caption('Basic Pygame program')
+    pygame.display.set_caption('ShopQuest')
 
     # Fill background
     background = pygame.Surface(screen.get_size())
@@ -118,7 +118,8 @@ def main():
     background.fill((250, 250, 250))
 
     stepSize, N, maze, itemPos = GenerateMaze()
-    ai = AI.AI(1, 3, (255, 0, 255))
+    ai = AI.AI(1, 3, (255, 0, 255), 'icons/AI.png')
+
     showScreen(screen, maze)
     player.drawCreature(screen, stepSize)
     pygame.display.update()
