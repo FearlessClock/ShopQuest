@@ -14,7 +14,9 @@ try:
     import Vector
     import Player
     import AI
+    import Generator
     import Node
+    import Generator
     from socket import *
     from pygame.locals import *
 except ImportError, err:
@@ -55,6 +57,7 @@ def getRandomEmptyBlock(maze):
     return itemPos
 
 
+
 def readMaze():
     # Read the file containing the maze
     f = open('maze.txt', 'r')
@@ -84,6 +87,12 @@ def readMaze():
     maze[itemPos.x][itemPos.y].payload = 2
     return width / len(maze), N, maze, itemPos
 
+def GenerateMaze():
+    maze = Generator.Maze(10, 10)
+    maze.generate()
+    maze.toFile(maze.__str__())
+    return readMaze()
+
 
 def isWall(maze, x, y):
     if maze[x][y].payload != 1:
@@ -108,7 +117,7 @@ def main():
     background = background.convert()
     background.fill((250, 250, 250))
 
-    stepSize, N, maze, itemPos = readMaze()
+    stepSize, N, maze, itemPos = GenerateMaze()
     ai = AI.AI(1, 3, (255, 0, 255))
     showScreen(screen, maze)
     player.drawCreature(screen, stepSize)
