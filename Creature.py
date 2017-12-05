@@ -3,11 +3,11 @@ import pygame
 
 
 class Creature:
-    def __init__(self, x, y, color, filename):
+    def __init__(self, x, y, color, filename, tileSize):
         self.pos = Vector.Vector(x, y)
         self.color = color
-        self.loadImage(filename)
-        self.icon = self.loadImage(filename)
+        self.loadImage(filename, tileSize)
+        self.icon = self.loadImage(filename, tileSize)
 
     def drawCreature(self, screen, stepSize):
         curRect = (self.pos.x * stepSize, self.pos.y * stepSize, stepSize - 2, stepSize - 2)
@@ -21,12 +21,12 @@ class Creature:
             return True;
         return False;
 
-    def loadImage(self, filename):
+    def loadImage(self, filename, tileSize):
         image = pygame.image.load(filename)
-        return pygame.transform.scale(image, (15, 15))
+        return pygame.transform.scale(image, (tileSize, tileSize))
 
     @staticmethod
     def checkEmpty(x, y, maze):
-        if len(maze) > x >= 0 and len(maze) > y >= 0 and maze[x][y].payload != 1:
+        if len(maze) > x >= 0 and len(maze) > y >= 0 and maze[x][y].wall != 1:
             return True
         return False

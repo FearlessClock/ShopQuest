@@ -1,12 +1,17 @@
 class Node:
-    def __init__(self, pos, payload):
+    def __init__(self, pos, wall):
         self.pos = pos
         self.floor = 0
-        self.payload = payload
+        self.icon = None
+        self.wall = wall
+        self.payload = 0
         self.neighbors = []
         self.parent = None
         self.g = -1
         self.f = -1
+
+    def setIcon(self, iconImage):
+        self.icon = iconImage
 
     def addNeighbors(self, node):
         self.neighbors.append(node)
@@ -16,6 +21,9 @@ class Node:
 
     def getPayload(self):
         return self.payload
+
+    def setPayload(self, val):
+        self.payload = val
 
     def getNeighbors(self):
         return self.neighbors

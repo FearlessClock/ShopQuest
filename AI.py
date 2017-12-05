@@ -22,8 +22,8 @@ def reconstructPath(node):
 
 
 class AI(Creature.Creature):
-    def __init__(self, x, y, color, filename):
-        Creature.Creature.__init__(self, x, y, color, filename)
+    def __init__(self, x, y, color, filename, tileSize):
+        Creature.Creature.__init__(self, x, y, color, filename, tileSize)
         self.pos = Vector.Vector(x, y)
         self.path = []
 
@@ -50,6 +50,8 @@ class AI(Creature.Creature):
             self.path = self.aStar(maze, maze[self.pos.x][self.pos.y], goal)
         if len(self.path) > 0:
             self.pos = self.path.pop().pos
+        else:
+            self.moveInDirection(random.randint(0, 4), maze)
 
     def aStar(self, maze, start, goal):
         # Already visited nodes

@@ -1,8 +1,8 @@
 import Creature
 
 class Player(Creature.Creature):
-    def __init__(self, x, y, color, filename):
-        Creature.Creature.__init__(self, x, y, color, filename)
+    def __init__(self, x, y, color, filename, tileSize):
+        Creature.Creature.__init__(self, x, y, color, filename, tileSize)
         self.up = 273
         self.down = 274
         self.right = 275
