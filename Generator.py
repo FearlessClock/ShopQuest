@@ -22,6 +22,7 @@ class Maze:
 
         while (visitedCount < self.height * self.width):
             currentNeighbours = self.findCurrentNeighbours(coordX, coordY)
+            self.removeRandomWall(coordX, coordY) #remove random wall on the path
 
             if (currentNeighbours is not None):
                 visitedCells.append((coordX, coordY))  # mark this position as visited
@@ -44,6 +45,7 @@ class Maze:
             for j in range(self.width):
                 self.matrix[i][j].visited = False
 
+
     def generateEmpty(self):
         matrix = []
         for x in range(self.height):
@@ -61,6 +63,24 @@ class Maze:
                 new.append(WALL_CHAR)
             matrix.append(new)
         return matrix
+
+    def removeRandomWall(self, coordX, coordY):
+        wallsList = self._findCurrentWalls(coordX, coordY)
+        toRemoveX, toRemoveY = random.choice(wallsList)
+        print 'x :' + str(toRemoveX)
+        print len(self.matrix)
+        if(toRemoveY > 0 and toRemoveY < self.width*2 and toRemoveX > 0 and toRemoveX < self.height*2):
+            if(random.randint(0,10) > 7):
+                self.visual_matrix[toRemoveX][toRemoveY] = PATH_CHAR
+
+    def _findCurrentWalls(self, coordX, coordY):
+        wallsList = []
+        wallsList.append((coordX*2, coordY*2 + 1))
+        wallsList.append((coordX*2 + 1, coordY*2 + 2))
+        wallsList.append((coordX*2 + 2, coordY*2 + 1))
+        wallsList.append((coordX*2 +1, coordY*2))
+        return wallsList
+
 
     def findCurrentNeighbours(self, coordX, coordY):
         neighboursList = list()
