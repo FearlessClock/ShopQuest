@@ -71,8 +71,13 @@ class AI(Creature.Creature):
         openSet = [start]
 
         while len(openSet) > 0:
-            sorted(openSet, key=lambda Node: Node.f)        #Rather just search for the best one, it is O(1)
-            current = openSet.pop(0)
+            index = 0
+            best = openSet[index].f
+            for i in range(0, len(openSet)):
+                if openSet[i].f < best:
+                    best = openSet[i].f
+                    index = i
+            current = openSet.pop(index)
             if current == goal:
                 return reconstructPath(current)
 
@@ -80,7 +85,7 @@ class AI(Creature.Creature):
 
             neighs = current.getNeighbors()
             for i in range(0, len(neighs)):
-                if len(neighs) > 0 and random.random() > 0.97:
+                if len(neighs) > 0 and random.random() > 0.95:
                     continue
                 curNeigh = neighs[i]
                 if closedSet.__contains__(curNeigh):

@@ -40,7 +40,8 @@ def showScreen(screen, maze, itemIcon):
             curRect = (i * stepSize, j * stepSize, stepSize, stepSize)
             wall = maze[i][j].wall
             if wall == 1 or wall == 0:
-                screen.blit(maze[i][j].icon, (curRect[0], curRect[1]))
+                if maze[i][j].icon != None:
+                    screen.blit(maze[i][j].icon, (curRect[0], curRect[1]))
                 # pygame.draw.rect(screen, (255, 0, 0), curRect, 0)
             elif wall == 0:
                 val = math.fabs(maze[i][j].f) * 5
@@ -154,6 +155,8 @@ def prettifyMaze(maze):
     TInnerWallIcon = pygame.transform.scale(TInnerWallIcon, (TILE_SIZE, TILE_SIZE))
     XInnerWallIcon = pygame.image.load('icons/XInnerWall.png')
     XInnerWallIcon = pygame.transform.scale(XInnerWallIcon, (TILE_SIZE, TILE_SIZE))
+    centerInnerWallIcon = pygame.image.load('icons/centerInnerWall.png')
+    centerInnerWallIcon = pygame.transform.scale(centerInnerWallIcon, (TILE_SIZE, TILE_SIZE))
 
     for i in range(len(maze)):
         for j in range(len(maze)):
@@ -216,6 +219,8 @@ def prettifyMaze(maze):
                 maze[i][j].setIcon(pygame.transform.rotate(TInnerWallIcon, angle))
             elif maze[i][j].wall == 1 and nmbrOfSurroundingWalls == 4:
                 maze[i][j].setIcon(XInnerWallIcon)
+            elif maze[i][j].wall == 1 and nmbrOfSurroundingWalls == 0:
+                maze[i][j].setIcon(centerInnerWallIcon)
 
 
 def GenerateMaze():
