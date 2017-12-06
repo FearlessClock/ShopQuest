@@ -67,8 +67,7 @@ class Maze:
     def removeRandomWall(self, coordX, coordY):
         wallsList = self._findCurrentWalls(coordX, coordY)
         toRemoveX, toRemoveY = random.choice(wallsList)
-        print 'x :' + str(toRemoveX)
-        print len(self.matrix)
+        
         if(toRemoveY > 0 and toRemoveY < self.width*2 and toRemoveX > 0 and toRemoveX < self.height*2):
             if(random.randint(0,10) > 7):
                 self.visual_matrix[toRemoveX][toRemoveY] = PATH_CHAR
