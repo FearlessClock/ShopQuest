@@ -218,10 +218,10 @@ def isWall(maze, x, y):
     return True
 
 
-width = 800
-height = 800
+width = 600
+height = 600
 MAZE_SIZE = 10
-TILE_SIZE = width / (MAZE_SIZE + 13)
+TILE_SIZE = min(width, height)/ (MAZE_SIZE + 13)
 GAME_SPEED = 350
 
 

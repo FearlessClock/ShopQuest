@@ -8,10 +8,10 @@ def text_objects(text, font):
     return textSurface, textSurface.get_rect()
 
 
-class Window():
+class Window:
     def __init__(self, windowSize, caption, TILE_SIZE):
-        self.height = windowSize.x
-        self.width = windowSize.y
+        self.height = windowSize.y
+        self.width = windowSize.x
         pygame.init()
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(caption)
@@ -20,7 +20,7 @@ class Window():
         self.bananaIcon = pygame.transform.scale(self.bananaIcon, (TILE_SIZE, TILE_SIZE))
 
         self.explosionIcon = pygame.image.load('icons/explosion.png')
-        self.explosionIcon = pygame.transform.scale(self.explosionIcon, (700, 300))
+        self.explosionIcon = pygame.transform.scale(self.explosionIcon, (self.width/2, self.height/2))
         self.TILE_SIZE = TILE_SIZE
         self.popup = False
 
@@ -68,10 +68,5 @@ class Window():
         pygame.display.update()
 
     def ItemPickedUpPopUp(self):
-        popUpRect = (100, 300, 400, 180)
+        popUpRect = (self.height/4, self.width/4, 400, 180)
         self.screen.blit(self.explosionIcon, (popUpRect[0], popUpRect[1]))
-
-        largeText = pygame.font.Font('freesansbold.ttf',50)
-        TextSurf, TextRect = text_objects("Item picked up!!", largeText)
-        TextRect.center = (popUpRect[0]+700/2, popUpRect[1]+popUpRect[1]/2)
-        self.screen.blit(TextSurf, TextRect)
