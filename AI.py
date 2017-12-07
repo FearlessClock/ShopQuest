@@ -20,8 +20,8 @@ def reconstructPath(node):
     return path
 
 
-
 class AI(Creature.Creature):
+    """"Structure to store the AI information and to make the AI move intelligently """
     def __init__(self, x, y, color, filename, tileSize):
         Creature.Creature.__init__(self, x, y, color, filename, tileSize)
         self.pos = Vector.Vector(x, y)
@@ -46,6 +46,7 @@ class AI(Creature.Creature):
                     self.pos.y += 1
 
     def moveToNode(self, maze, goal):
+        """If no path is known, find a new one otherwise continue on this path"""
         if len(self.path) == 0:
             self.path = self.aStar(maze, maze[self.pos.x][self.pos.y], goal)
         if len(self.path) > 0:
@@ -54,7 +55,7 @@ class AI(Creature.Creature):
             self.moveInDirection(random.randint(0, 4), maze)
 
     def aStar(self, maze, start, goal):
-        # Already visited nodes
+        """Reset all the maze information"""
         for i in range(0, len(maze)):
             for j in range(0, len(maze)):
                 maze[i][j].g = -1
@@ -62,6 +63,7 @@ class AI(Creature.Creature):
                 maze[i][j].parent = None
                 maze[i][j].floor = 0
 
+        # Already visited nodes
         closedSet = []
 
         start.g = 0
@@ -73,17 +75,21 @@ class AI(Creature.Creature):
         while len(openSet) > 0:
             index = 0
             best = openSet[index].f
+            # Find the best node to go to next
             for i in range(0, len(openSet)):
                 if openSet[i].f < best:
                     best = openSet[i].f
                     index = i
             current = openSet.pop(index)
+
+            # When the algo reaches the goal, quit
             if current == goal:
                 return reconstructPath(current)
 
             closedSet.append(current)
 
             neighs = current.getNeighbors()
+            # For each neighbor, check if it is an interesting candidate
             for i in range(0, len(neighs)):
                 if len(neighs) > 0 and random.random() > 0.95:
                     continue

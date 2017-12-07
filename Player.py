@@ -1,6 +1,8 @@
 import Creature
 
+
 class Player(Creature.Creature):
+    """Structure to store the player information"""
     def __init__(self, x, y, color, filename, tileSize):
         Creature.Creature.__init__(self, x, y, color, filename, tileSize)
         self.up = 273
@@ -19,4 +21,3 @@ class Player(Creature.Creature):
             self.pos.x -= self.speed
         elif key == self.right and self.checkEmpty(self.pos.x + 1, self.pos.y, maze):
             self.pos.x += self.speed
-

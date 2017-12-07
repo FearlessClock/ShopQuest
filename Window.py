@@ -3,11 +3,6 @@ from threading import Timer
 import pygame
 
 
-def text_objects(text, font):
-    textSurface = font.render(text, True, (0, 0, 0))
-    return textSurface, textSurface.get_rect()
-
-
 class Window:
     def __init__(self, windowSize, caption, TILE_SIZE):
         self.height = windowSize.y
@@ -25,9 +20,10 @@ class Window:
         self.popup = False
 
     def ShowPopUp(self):
+        """The pop up shown is the item picked up pop up"""
         self.popup = True
         t = Timer(1.0, self.RemovePopUp)
-        t.start()  # after 30 seconds, "hello, world" will be printed
+        t.start()  # after 1 second, the pop up will be removed
 
     def RemovePopUp(self):
         self.popup = False
@@ -43,6 +39,7 @@ class Window:
     def showScreen(self, maze, itemIcon):
         # Display the map
         stepSize = self.TILE_SIZE
+        """For each cell, find the icon and show it on the screen"""
         for i in range(0, len(maze)):
             for j in range(0, len(maze[i])):
                 curRect = (i * stepSize, j * stepSize, stepSize, stepSize)
@@ -50,16 +47,11 @@ class Window:
                 if wall == 1 or wall == 0:
                     if maze[i][j].icon is not None:
                         self.screen.blit(maze[i][j].icon, (curRect[0], curRect[1]))
-                        # pygame.draw.rect(screen, (255, 0, 0), curRect, 0)
-                elif wall == 0:
-                    val = pygame.math.fabs(maze[i][j].f) * 5
-                    if val > 254:
-                        val = 254
-                    pygame.draw.rect(self.screen, (val, 255, val), curRect, 0)
                 if maze[i][j].payload == 2:
                     self.screen.blit(itemIcon, (curRect[0], curRect[1]))
 
     def drawScreen(self, player, AI, maze):
+        """Draw the screen, characters and pop up if activated"""
         self.showScreen(maze, self.bananaIcon)
         player.drawCreature(self.screen, self.TILE_SIZE)
         AI.drawCreature(self.screen, self.TILE_SIZE)

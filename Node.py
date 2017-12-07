@@ -1,4 +1,6 @@
 class Node:
+    """Node structure to represent the graph of the maze. Allows us to know a lot of information about the maze in one position"""
+
     def __init__(self, pos, wall):
         self.pos = pos
         self.floor = 0

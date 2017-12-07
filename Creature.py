@@ -3,6 +3,7 @@ import pygame
 
 
 class Creature:
+    """The base class for the interacting candidates"""
     def __init__(self, x, y, color, filename, tileSize):
         self.pos = Vector.Vector(x, y)
         self.color = color
@@ -11,7 +12,6 @@ class Creature:
 
     def drawCreature(self, screen, stepSize):
         curRect = (self.pos.x * stepSize, self.pos.y * stepSize, stepSize - 2, stepSize - 2)
-        # pygame.draw.rect(screen, self.color, curRect, 0)
         screen.blit(self.icon, (curRect[0], curRect[1]))
 
     def isOnItem(self, maze):
